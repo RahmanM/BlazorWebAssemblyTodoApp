@@ -1,0 +1,73 @@
+﻿@page "/todos_add"
+
+@using BlazorTodos.Server.Data
+@inject HttpClient Http
+@inject NavigationManager UriHelper
+
+<h3>Add Todo</h3>
+
+<BSForm Model="todoViewModel" OnValidSubmit="@(()=> @HandleValidSubmit())">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <BSFormGroup>
+        <BSLabel For="description">Description</BSLabel>
+        <BSInput Id="description" InputType="InputType.Text" PlaceHolder="Todo Description" @bind-Value="todoViewModel.Description">
+        </BSInput>
+        <small id="descriptionHelp" class="form-text text-muted">Enter todo description, minimum 5 characters</small>
+    </BSFormGroup>
+
+    <BSFormGroup IsCheck="true">
+        <BSInput Id="completed" InputType="InputType.Checkbox" @bind-Value="todoViewModel.Complete"> </BSInput>
+        <BSLabel IsCheck="true" For="completed">Completed?</BSLabel>
+    </BSFormGroup>
+
+    <br />
+
+    <BSFormGroup>
+        <BSLabel For="todo-category">Select Category</BSLabel>
+        <BSBasicInput Id="todo-category" InputType="InputType.Select" @bind-Value="todoViewModel.TodoCategoryId">
+            <option value=""></option>
+            @if (categories != null)
+            {
+                @foreach (var category in categories)
+                {
+                    <option value=@category.Id>@category.Description</option>
+                }
+            }
+
+        </BSBasicInput>
+    </BSFormGroup>
+
+    <br />
+
+    <BSButton Color="Color.Primary" ButtonType="ButtonType.Submit">Save</BSButton>
+</BSForm>
+
+
+@code {
+    private TodoViewModel todoViewModel = new TodoViewModel();
+
+    private async Task HandleValidSubmit()
+    {
+        Console.WriteLine(todoViewModel);
+        using var response = await Http.PostAsJsonAsync("/api/todoes", todoViewModel);
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorMessage = response.ReasonPhrase;
+            Console.WriteLine($"There was an error! {errorMessage}");
+            return;
+        }
+        else
+        {
+            UriHelper.NavigateTo("/");
+        }
+    }
+
+    private TodoCategoryViewModel[] categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await Http.GetFromJsonAsync<TodoCategoryViewModel[]>("/api/todocategories");
+    }
+}

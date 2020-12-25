@@ -1,0 +1,70 @@
+@page "/"
+@using BlazorTodos.Shared
+@using BlazorTodos.Server.Data
+@inject HttpClient Http
+@inject IJSRuntime JsRuntime
+
+
+<h1>Todoes</h1>
+
+<p><a href="Todos_Add">Add New Todo</a></p>
+
+@if (todoes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Completed?</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var todo in todoes)
+            {
+                <tr>
+                    <td>@todo.Description</td>
+                    <td>@todo.Category</td>
+                    <td>
+                        @(todo.Complete == true ? "Yes" : "No")
+                    </td>
+                    <td><a href="javascript: void(0);" @onclick="(()=> deleteTodo(todo.Id))">Delete</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private TodoViewModel[] todoes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await PopulateTodos();
+    }
+
+    protected async Task PopulateTodos()
+    {
+        todoes = await Http.GetFromJsonAsync<TodoViewModel[]>("/api/todoes");
+    }
+
+    async Task deleteTodo(int id)
+    {
+        if (id > 0)
+        {
+            bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+            if (confirmed)
+            {
+                await Http.DeleteAsync("/api/todoes/" + id);
+                await PopulateTodos();
+            }
+        }
+
+    }
+
+}

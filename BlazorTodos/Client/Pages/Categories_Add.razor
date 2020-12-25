@@ -1,0 +1,45 @@
+﻿@page "/categories_add"
+
+@using BlazorTodos.Server.Data
+@inject HttpClient Http
+@inject NavigationManager UriHelper
+
+<h3>Add Todo Category</h3>
+
+<BSForm Model="categoryViewModel" OnValidSubmit="@(()=> @HandleValidSubmit())">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <BSFormGroup>
+        <BSLabel For="description">Description</BSLabel>
+        <BSInput Id="description" InputType="InputType.Text" PlaceHolder="Todo Description" @bind-Value="categoryViewModel.Description">
+        </BSInput>
+        <small id="descriptionHelp" class="form-text text-muted">Enter category description, minimum 5 characters</small>
+    </BSFormGroup>
+
+    <br />
+
+    <BSButton Color="Color.Primary" ButtonType="ButtonType.Submit">Save</BSButton>
+</BSForm>
+
+
+@code {
+    private TodoCategoryViewModel categoryViewModel = new TodoCategoryViewModel() {Active = true };
+
+    private async Task HandleValidSubmit()
+    {
+        Console.WriteLine(categoryViewModel);
+        using var response = await Http.PostAsJsonAsync("/api/todocategories", categoryViewModel);
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorMessage = response.ReasonPhrase;
+            Console.WriteLine($"There was an error! {errorMessage}");
+            return;
+        }
+        else
+        {
+            UriHelper.NavigateTo("/categories");
+        }
+    }
+
+}
