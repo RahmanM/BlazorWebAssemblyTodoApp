@@ -31,7 +31,9 @@ else
                     <td>
                         @(category.Active == true ? "Yes" : "No")
                     </td>
-                    <td><a href="javascript: void(0);" @onclick="(()=> deleteCategory(category.Id))">Delete</a></td>
+                    <td>
+                    <a href="javascript: void(0);" @onclick="(()=> deleteCategory(category.Id))"><i class="far fa-trash-alt"></i></a>
+                    </td>
                 </tr>
             }
         </tbody>

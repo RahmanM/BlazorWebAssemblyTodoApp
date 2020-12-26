@@ -20,7 +20,7 @@ else
             <tr>
                 <th>Description</th>
                 <th>Category</th>
-                <th>Completed?</th>
+                <th>Done?</th>
                 <th></th>
             </tr>
         </thead>
@@ -33,7 +33,10 @@ else
                     <td>
                         @(todo.Complete == true ? "Yes" : "No")
                     </td>
-                    <td><a href="javascript: void(0);" @onclick="(()=> deleteTodo(todo.Id))">Delete</a></td>
+                    <td>
+                        <a href="javascript: void(0);" @onclick="(()=> deleteTodo(todo.Id))"><i class="far fa-trash-alt"></i></a> |
+                        <a href="javascript: void(0);" @onclick="(()=> flipComplete(todo.Id))"><i class="fas fa-check"></i></a>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -42,6 +45,7 @@ else
 
 @code {
     private TodoViewModel[] todoes;
+    BSModal LiveDemo { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,6 +67,18 @@ else
                 await Http.DeleteAsync("/api/todoes/" + id);
                 await PopulateTodos();
             }
+        }
+
+    }
+
+    async Task flipComplete(int id)
+    {
+        if (id > 0)
+        {
+
+            HttpContent httpContent = new StringContent(id.ToString());
+            await Http.PutAsync("/api/todoes/" + id, httpContent);
+            await PopulateTodos();
         }
 
     }

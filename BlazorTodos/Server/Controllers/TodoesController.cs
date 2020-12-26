@@ -26,7 +26,7 @@ namespace BlazorTodos.Server.Controllers
         {
             //_context.Database.EnsureDeleted();
             _context.Database.EnsureCreated();
-            var todos = _context.Todos.Include(i=> i.TodoCategory).ToList();
+            var todos = _context.Todos.Include(i => i.TodoCategory).ToList();
 
             var todosViewModel = new List<TodoViewModel>();
             foreach (var t in todos)
@@ -59,36 +59,55 @@ namespace BlazorTodos.Server.Controllers
         //    return todo;
         //}
 
+        //// PUT: api/Todoes/5
+        //// To protect from overposting attacks, enable the specific properties you want to bind to, for
+        //// more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutTodo(int id, TodoViewModel todo)
+        //{
+        //    if (id != todo.Id)
+        //    {
+        //        return BadRequest();
+        //    }
+
+        //    _context.Entry(todo).State = EntityState.Modified;
+
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!TodoExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
+
+        //    return NoContent();
+        //}
+
         // PUT: api/Todoes/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTodo(int id, TodoViewModel todo)
+        public async Task<IActionResult> FlipComplete(int id)
         {
-            if (id != todo.Id)
+            var todo = _context.Todos.SingleOrDefault(t => t.Id == id);
+
+            if(todo == null)
             {
-                return BadRequest();
+                return NotFound("Todo not found!");
             }
 
-            _context.Entry(todo).State = EntityState.Modified;
+            todo.Complete = !todo.Complete;
+            await _context.SaveChangesAsync();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TodoExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok();
         }
 
         // POST: api/Todoes
