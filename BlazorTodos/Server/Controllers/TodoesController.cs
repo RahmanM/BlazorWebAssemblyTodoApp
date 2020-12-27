@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BlazorTodos.Server.Data;
+using System.Threading;
 
 namespace BlazorTodos.Server.Controllers
 {
@@ -22,27 +23,27 @@ namespace BlazorTodos.Server.Controllers
 
         // GET: api/Todoes
         [HttpGet]
-        public IEnumerable<TodoViewModel> GetTodos()
+        public async  Task<IActionResult> GetTodos()
         {
             //_context.Database.EnsureDeleted();
             _context.Database.EnsureCreated();
-            var todos = _context.Todos.Include(i => i.TodoCategory).ToList();
+            var todos = await _context.Todos.Include(i => i.TodoCategory).ToListAsync();
 
             var todosViewModel = new List<TodoViewModel>();
-            foreach (var t in todos)
+            foreach (var todo in todos)
             {
                 todosViewModel.Add(new TodoViewModel()
                 {
-                    Id = t.Id,
-                    Active = t.Active,
-                    TodoCategoryId = t.TodoCategoryId,
-                    Complete = t.Complete,
-                    Description = t.Description,
-                    Category = t.TodoCategory?.Description
+                    Id = todo.Id,
+                    Active = todo.Active,
+                    TodoCategoryId = todo.TodoCategoryId,
+                    Complete = todo.Complete,
+                    Description = todo.Description,
+                    Category = todo.TodoCategory?.Description
                 });
             }
 
-            return todosViewModel;
+            return Ok(todosViewModel);
         }
 
         //// GET: api/Todoes/5

@@ -42,6 +42,8 @@
     <br />
 
     <BSButton Color="Color.Primary" ButtonType="ButtonType.Submit">Save</BSButton>
+    <BSButton Color="Color.Danger" ButtonType="ButtonType.Button" @onclick="@(()=> @Cancel())">Cancel</BSButton>
+
 </BSForm>
 
 
@@ -62,6 +64,11 @@
         {
             UriHelper.NavigateTo("/");
         }
+    }
+
+    private void Cancel()
+    {
+        UriHelper.NavigateTo("/");
     }
 
     private TodoCategoryViewModel[] categories;
