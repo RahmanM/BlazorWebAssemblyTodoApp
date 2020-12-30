@@ -1,0 +1,59 @@
+﻿@using BlazorTodos.Shared
+@using BlazorTodos.Server.Data
+@inject HttpClient Http
+@inject IJSRuntime JsRuntime
+
+@if (Categories != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Active?</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var category in Categories)
+            {
+                <tr>
+                    <td>@category.Description</td>
+                    <td>
+                        @(category.Active == true ? "Yes" : "No")
+                    </td>
+                    <td>
+                        <a href="javascript: void(0);" @onclick="(()=> deleteCategory(category.Id))"><i class="far fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div>There are no categories to show.</div>
+}
+
+@code {
+
+    [Parameter]
+    public TodoCategoryViewModel[] Categories { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnListChanged { get; set; }
+
+    async Task deleteCategory(int id)
+    {
+        if (id > 0)
+        {
+            bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+            if (confirmed)
+            {
+                await Http.DeleteAsync("/api/todocategories/" + id);
+                await OnListChanged.InvokeAsync("Category is deleted.");
+            }
+        }
+    }
+
+}
+

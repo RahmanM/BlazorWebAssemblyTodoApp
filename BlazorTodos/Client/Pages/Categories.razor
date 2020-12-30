@@ -11,33 +11,7 @@
 <p><a href="Categories_Add">Add New Category</a></p>
 
 <Spinner SpinWhile=@(categories == null) />
-
-@if (categories != null)
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Description</th>
-                <th>Active?</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var category in categories)
-            {
-                <tr>
-                    <td>@category.Description</td>
-                    <td>
-                        @(category.Active == true ? "Yes" : "No")
-                    </td>
-                    <td>
-                        <a href="javascript: void(0);" @onclick="(()=> deleteCategory(category.Id))"><i class="far fa-trash-alt"></i></a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<CategoriesList Categories=@categories OnListChanged="OnCategoryChangedHandler"/>
 
 @code {
     private TodoCategoryViewModel[] categories;
@@ -47,17 +21,9 @@
         categories = await Http.GetFromJsonAsync<TodoCategoryViewModel[]>("/api/todocategories");
     }
 
-    async Task deleteCategory(int id)
+    // Call back from the child component so the page can refresh its content or do whatever is needed
+    async Task OnCategoryChangedHandler(string message)
     {
-        if (id > 0)
-        {
-            bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
-            if (confirmed)
-            {
-                await Http.DeleteAsync("/api/todocategories/" + id);
-                await OnInitializedAsync();
-            }
-        }
+        await OnInitializedAsync();
     }
-
 }
